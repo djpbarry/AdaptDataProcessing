@@ -42,7 +42,8 @@ public class Data_File_Averager implements PlugIn {
     private static boolean normParams[], selection[];
     public static final int VEL_INDEX = 2, TIME_INDEX = 1, LENGTH_INDEX = 8;
     private static File directory;
-    private final String delimiter = GenUtils.getDelimiter(); // delimiter in directory strings
+    private final String directoryDelim = GenUtils.getDelimiter(); // delimiter in directory strings
+    private final String paramDelim = ",\\s";
 
 //    public static void main(String args[]) {
 //        new Data_File_Averager().run(null);
@@ -57,7 +58,7 @@ public class Data_File_Averager implements PlugIn {
             return;
         }
         FileReader reader = new FileReader(numOfFiles, headerSize);
-        reader.getParamList(files);
+        reader.getParamList(files, paramDelim);
         numParams = reader.getNumParams();
         ArrayList<Double> data[][] = new ArrayList[numOfFiles][numParams];
         double maxima[][] = new double[numOfFiles][numParams];
@@ -68,7 +69,7 @@ public class Data_File_Averager implements PlugIn {
                 selection[i] = true;
             }
         }
-        reader.readData(data, files);
+        reader.readData(data, files, paramDelim);
         String headings[] = reader.getParamsArray();
         selection = showSelectionDialog(headings, "Specify parameters to be output", numParams, selection);
         if (truncate) {
@@ -282,7 +283,7 @@ public class Data_File_Averager implements PlugIn {
         File thisMeanData;
         PrintWriter thisDataStream;
         try {
-            thisMeanData = new File(directory + delimiter + "mean_data.txt");
+            thisMeanData = new File(directory + directoryDelim + "mean_data.txt");
             thisDataStream = new PrintWriter(new FileOutputStream(thisMeanData));
         } catch (FileNotFoundException e) {
             IJ.error(e.toString());
@@ -331,14 +332,14 @@ public class Data_File_Averager implements PlugIn {
     }
 
     void colateData(File directory, String headings[], int numOfFiles, ArrayList<Double>[][] data) {
-        File colateDir = GenUtils.createDirectory(directory + delimiter + "Colated_Data");
+        File colateDir = GenUtils.createDirectory(directory + directoryDelim + "Colated_Data");
         for (int p = 0; p < numParams; p++) {
             if (selection[p]) {
                 File paramFile;
                 PrintWriter paramStream;
                 try {
                     headings[p] = GenUtils.checkFileSep(headings[p], '-');
-                    paramFile = new File(colateDir + delimiter + headings[p] + ".txt");
+                    paramFile = new File(colateDir + directoryDelim + headings[p] + ".txt");
                     paramStream = new PrintWriter(new FileOutputStream(paramFile));
                 } catch (FileNotFoundException e) {
                     IJ.error(e.toString());
@@ -366,11 +367,11 @@ public class Data_File_Averager implements PlugIn {
 
     void aggregateData(File directory, String[] headings, int numOfFiles, ArrayList<Double>[][] data,
             int numParams, boolean[] selection) {
-        File aggDir = GenUtils.createDirectory(directory + delimiter + "Aggregated_Data");
+        File aggDir = GenUtils.createDirectory(directory + directoryDelim + "Aggregated_Data");
         File paramFile;
         PrintWriter paramStream;
         try {
-            paramFile = new File(aggDir + delimiter + "aggregated_data.txt");
+            paramFile = new File(aggDir + directoryDelim + "aggregated_data.txt");
             paramStream = new PrintWriter(new FileOutputStream(paramFile));
         } catch (FileNotFoundException e) {
             IJ.error(e.toString());
@@ -406,7 +407,7 @@ public class Data_File_Averager implements PlugIn {
         File thisFile;
         PrintWriter thisStream;
         try {
-            thisFile = new File(directory + delimiter + "file_list.txt");
+            thisFile = new File(directory + directoryDelim + "file_list.txt");
             thisStream = new PrintWriter(new FileOutputStream(thisFile));
         } catch (FileNotFoundException e) {
             IJ.error(e.toString());

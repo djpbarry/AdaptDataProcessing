@@ -47,15 +47,15 @@ public class FileReader {
         this.paramNames = new ArrayList();
     }
 
-    public void readData(ArrayList<Double> data[][], File files[]) {
+    public void readData(ArrayList<Double>[][] data, File[] files, String delimiter) {
         for (int i = 0; i < numOfFiles; i++) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i])))) {
                 filenames[i] = br.readLine();
-                ArrayList<String> thisParams = getParamsArray(br.readLine());
+                ArrayList<String> thisParams = getParamsArray(br.readLine(), delimiter);
                 int numThisParams = thisParams.size();
                 String line = br.readLine();
                 while (line != null) {
-                    Scanner scan = new Scanner(line);
+                    Scanner scan = new Scanner(line).useDelimiter(delimiter);
                     for (int k = 0; k < numThisParams; k++) {
                         int j = getParamIndex(thisParams.get(k), paramNames);
                         if (data[i][j] == null) {
@@ -87,8 +87,8 @@ public class FileReader {
         return paramArray;
     }
 
-    public ArrayList<String> getParamsArray(String headings) {
-        Scanner scanner = new Scanner(headings);
+    public ArrayList<String> getParamsArray(String headings, String delimiter) {
+        Scanner scanner = new Scanner(headings).useDelimiter(delimiter);
         ArrayList<String> headingsArray = new ArrayList();
         while (scanner.hasNext()) {
             headingsArray.add(scanner.next());
@@ -132,14 +132,14 @@ public class FileReader {
         return Double.NaN;
     }
 
-    public void getParamList(File files[]) {
+    public void getParamList(File[] files, String delimiter) {
         for (int i = 0; i < numOfFiles; i++) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i])))) {
                 for (int j = 0; j < headerSize; j++) {
                     br.readLine();
                 }
                 String paramLine = br.readLine();
-                Scanner scan = new Scanner(paramLine);
+                Scanner scan = new Scanner(paramLine).useDelimiter(delimiter);
                 while (scan.hasNext()) {
                     String thisParam = scan.next();
                     if (!paramNames.contains(thisParam)) {

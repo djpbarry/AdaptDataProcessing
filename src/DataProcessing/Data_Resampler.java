@@ -64,8 +64,8 @@ public class Data_Resampler implements PlugIn {
                 + delimiter + "Resampled", delimiter));
         ArrayList<Double> data[][] = new ArrayList[numOfFiles][numParams];
         FileReader reader = new FileReader(numOfFiles, headerSize);
-        reader.getParamList(files);
-        reader.readData(data, files);
+        reader.getParamList(files, ",\\s");
+        reader.readData(data, files, ",\\s");
         String headings = reader.getParamString();
         String filenames[] = reader.getFilenames();
 
