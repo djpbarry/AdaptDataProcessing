@@ -33,7 +33,7 @@ import java.util.Scanner;
  *
  * @author barry05
  */
-public class Data_Resampler implements PlugIn {
+public class DataResampler implements PlugIn {
 
     private final String TITLE = "Data Resampler";
     private static int headerSize = 1;
@@ -54,7 +54,7 @@ public class Data_Resampler implements PlugIn {
         if (IJ.getInstance() != null) {
             init = new File(IJ.getDirectory("current"));
         }
-        File inDir = Utilities.getFolder(init, "Select Directory");
+        File inDir = Utilities.getFolder(init, "Select Directory", true);
         File files[] = inDir.listFiles();
         int numOfFiles = files.length;
         if (!showDialog()) {

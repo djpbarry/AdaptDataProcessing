@@ -49,13 +49,14 @@ public class FileReader {
 
     public void readData(ArrayList<Double>[][] data, File[] files, String delimiter) {
         for (int i = 0; i < numOfFiles; i++) {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i])))) {
+            try {
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i])));
                 filenames[i] = br.readLine();
                 ArrayList<String> thisParams = getParamsArray(br.readLine(), delimiter);
                 int numThisParams = thisParams.size();
                 String line = br.readLine();
                 while (line != null) {
-                    Scanner scan = new Scanner(line).useDelimiter(delimiter);
+                    Scanner scan = new Scanner(line).useDelimiter(delimiter + "\\s*");
                     for (int k = 0; k < numThisParams; k++) {
                         int j = getParamIndex(thisParams.get(k), paramNames);
                         if (data[i][j] == null) {
@@ -81,7 +82,7 @@ public class FileReader {
     public String[] getParamsArray() {
         int numParams = paramNames.size();
         String[] paramArray = new String[numParams];
-        for(int i=0;i<numParams;i++){
+        for (int i = 0; i < numParams; i++) {
             paramArray[i] = paramNames.get(i);
         }
         return paramArray;
@@ -106,7 +107,8 @@ public class FileReader {
     }
 
     public double readParam(File paramFile, int headerSize, String paramName) {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(paramFile)))) {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(paramFile)));
             for (int j = 0; j < headerSize; j++) {
                 br.readLine();
             }
@@ -134,7 +136,8 @@ public class FileReader {
 
     public void getParamList(File[] files, String delimiter) {
         for (int i = 0; i < numOfFiles; i++) {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i])))) {
+            try {
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i])));
                 for (int j = 0; j < headerSize; j++) {
                     br.readLine();
                 }

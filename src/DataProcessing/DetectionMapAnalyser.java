@@ -34,7 +34,7 @@ import java.io.PrintWriter;
  *
  * @author barry05
  */
-public class Detection_Map_Analyser implements PlugIn {
+public class DetectionMapAnalyser implements PlugIn {
 
     private static File directory;
     private final String delimiter = GenUtils.getDelimiter();
@@ -43,11 +43,11 @@ public class Detection_Map_Analyser implements PlugIn {
 //        (new Detection_Map_Analyser()).run(null);
 //    }
     
-    public Detection_Map_Analyser() {
+    public DetectionMapAnalyser() {
     }
 
     public void run(String arg) {
-        directory = Utilities.getFolder(directory, "Select Folder");
+        directory = Utilities.getFolder(directory, "Select Folder", true);
         ImageProcessor signalMap = (IJ.openImage(directory.getAbsolutePath() + delimiter + "SignalMap.tif")).getProcessor();
         ImageStatistics stats = signalMap.getStatistics();
         File mapDir = new File(directory.getAbsolutePath() + delimiter + "Maps");

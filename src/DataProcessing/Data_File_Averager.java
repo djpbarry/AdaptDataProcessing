@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -36,27 +37,34 @@ import java.util.Arrays;
 public class Data_File_Averager implements PlugIn {
 
     private final String TITLE = "Data Averager";
-    private static int headerSize=1;
+    private static int headerSize = 1;
     private static int numParams;
     private static boolean normalise = true, truncate = true, colate = true;
     private static boolean normParams[], selection[];
     public static final int VEL_INDEX = 2, TIME_INDEX = 1, LENGTH_INDEX = 8;
     private static File directory;
     private final String directoryDelim = GenUtils.getDelimiter(); // delimiter in directory strings
-    private final String paramDelim = ",\\s";
+    private final String paramDelim = ",";
+    private final String FILE_LIST = "file_list.txt";
+    private final String AGG_DATA = "Aggregated_Data";
+    private final String COL_DATA = "Collated_Data";
+    private final String MEAN_DATA = "mean_data.csv";
 
 //    public static void main(String args[]) {
 //        new Data_File_Averager().run(null);
 //        System.exit(0);
 //    }
-
     public void run(String arg) {
-        directory = Utilities.getFolder(directory, "Select Directory");
-        File files[] = directory.listFiles();
-        int numOfFiles = files.length;
-        if (!showDialog()) {
+        directory = Utilities.getFolder(directory, "Select Directory", true);
+        if (directory == null) {
             return;
         }
+        cleanDirectory();
+        File files[] = directory.listFiles();
+        int numOfFiles = files.length;
+//        if (!showDialog()) {
+//            return;
+//        }
         FileReader reader = new FileReader(numOfFiles, headerSize);
         reader.getParamList(files, paramDelim);
         numParams = reader.getNumParams();
@@ -95,25 +103,24 @@ public class Data_File_Averager implements PlugIn {
         GenUtils.showDone(this);
     }
 
-    boolean showDialog() {
-        GenericDialog gd = new GenericDialog(TITLE);
-        gd.addNumericField("Header Size", headerSize, 0);
-//        gd.addNumericField("Number of Parameters", numParams, 0);
-        gd.addCheckbox("Normalise Data?", normalise);
-        gd.addCheckbox("Truncate Data?", truncate);
-        gd.addCheckbox("Colate Data?", colate);
-        gd.showDialog();
-        if (gd.wasCanceled()) {
-            return false;
-        }
-        headerSize = (int) Math.round(gd.getNextNumber());
-//        numParams = (int) Math.round(gd.getNextNumber());
-        normalise = gd.getNextBoolean();
-        truncate = gd.getNextBoolean();
-        colate = gd.getNextBoolean();
-        return true;
-    }
-
+//    boolean showDialog() {
+//        GenericDialog gd = new GenericDialog(TITLE);
+////        gd.addNumericField("Header Size", headerSize, 0);
+////        gd.addNumericField("Number of Parameters", numParams, 0);
+//        gd.addCheckbox("Normalise Data?", normalise);
+////        gd.addCheckbox("Truncate Data?", truncate);
+//        gd.addCheckbox("Collate Data?", colate);
+//        gd.showDialog();
+//        if (gd.wasCanceled()) {
+//            return false;
+//        }
+////        headerSize = (int) Math.round(gd.getNextNumber());
+////        numParams = (int) Math.round(gd.getNextNumber());
+//        normalise = gd.getNextBoolean();
+////        truncate = gd.getNextBoolean();
+//        colate = gd.getNextBoolean();
+//        return true;
+//    }
     boolean[] showSelectionDialog(String[] headings, String dialogHeading, int numParams, boolean[] defaults) {
         GenericDialog gd = new GenericDialog(dialogHeading);
         boolean selection[] = new boolean[numParams];
@@ -283,7 +290,7 @@ public class Data_File_Averager implements PlugIn {
         File thisMeanData;
         PrintWriter thisDataStream;
         try {
-            thisMeanData = new File(directory + directoryDelim + "mean_data.txt");
+            thisMeanData = new File(directory + directoryDelim + MEAN_DATA);
             thisDataStream = new PrintWriter(new FileOutputStream(thisMeanData));
         } catch (FileNotFoundException e) {
             IJ.error(e.toString());
@@ -291,7 +298,7 @@ public class Data_File_Averager implements PlugIn {
         }
         thisDataStream.println(directory.getAbsolutePath());
         for (String h : headings) {
-            thisDataStream.print(h + "\t\t");
+            thisDataStream.print(h + ", , ");
         }
         thisDataStream.println();
         boolean cont = true;
@@ -318,9 +325,9 @@ public class Data_File_Averager implements PlugIn {
                         }
                         double mean = DataStatistics.calcMean(thisdata);
                         double stdDev = DataStatistics.calcStdDev(thisdata, n, mean);
-                        thisDataStream.print(mean + "\t" + stdDev + "\t");
+                        thisDataStream.print(mean + ", " + stdDev + ", ");
                     } else {
-                        thisDataStream.print(" \t \t");
+                        thisDataStream.print(", , ");
                     }
                 }
                 thisDataStream.print(n);
@@ -332,7 +339,7 @@ public class Data_File_Averager implements PlugIn {
     }
 
     void colateData(File directory, String headings[], int numOfFiles, ArrayList<Double>[][] data) {
-        File colateDir = GenUtils.createDirectory(directory + directoryDelim + "Colated_Data");
+        File colateDir = GenUtils.createDirectory(directory + directoryDelim + COL_DATA);
         for (int p = 0; p < numParams; p++) {
             if (selection[p]) {
                 File paramFile;
@@ -367,7 +374,7 @@ public class Data_File_Averager implements PlugIn {
 
     void aggregateData(File directory, String[] headings, int numOfFiles, ArrayList<Double>[][] data,
             int numParams, boolean[] selection) {
-        File aggDir = GenUtils.createDirectory(directory + directoryDelim + "Aggregated_Data");
+        File aggDir = GenUtils.createDirectory(directory + directoryDelim + AGG_DATA);
         File paramFile;
         PrintWriter paramStream;
         try {
@@ -377,11 +384,11 @@ public class Data_File_Averager implements PlugIn {
             IJ.error(e.toString());
             return;
         }
-            for (int p = 0; p < numParams; p++) {
-                if (selection[p]) {
-                    paramStream.print(headings[p] + "\t");
-                }
+        for (int p = 0; p < numParams; p++) {
+            if (selection[p]) {
+                paramStream.print(headings[p] + "\t");
             }
+        }
         paramStream.println();
         for (int j = 0; j < numOfFiles; j++) {
             if (data[j][0] != null) {
@@ -407,7 +414,7 @@ public class Data_File_Averager implements PlugIn {
         File thisFile;
         PrintWriter thisStream;
         try {
-            thisFile = new File(directory + directoryDelim + "file_list.txt");
+            thisFile = new File(directory + directoryDelim + FILE_LIST);
             thisStream = new PrintWriter(new FileOutputStream(thisFile));
         } catch (FileNotFoundException e) {
             IJ.error(e.toString());
@@ -418,6 +425,14 @@ public class Data_File_Averager implements PlugIn {
         }
         thisStream.close();
     }
+
+    private void cleanDirectory() {
+        FileUtils.deleteQuietly(new File(directory + directoryDelim + FILE_LIST));
+        FileUtils.deleteQuietly(new File(directory + directoryDelim + MEAN_DATA));
+        FileUtils.deleteQuietly(new File(directory + directoryDelim + AGG_DATA));
+        FileUtils.deleteQuietly(new File(directory + directoryDelim + COL_DATA));
+    }
+
 //    ImageStack buildHeatMap(ArrayList<Double>[][] data, int width, int height, int xIndex, int yIndex, double maxX, double maxY, double minX, double minY) {
 //        int stackSize = 360;
 //        ImageStack output = new ImageStack(width, height);
