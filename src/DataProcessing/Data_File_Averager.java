@@ -21,6 +21,7 @@ import IAClasses.DataStatistics;
 import UtilClasses.GenUtils;
 import ij.IJ;
 import ij.gui.GenericDialog;
+import ij.gui.Plot;
 import ij.plugin.PlugIn;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -52,14 +53,16 @@ public class Data_File_Averager implements PlugIn {
     private final String MEAN_DATA = "mean_data.csv";
     private final String headings[];
     private final String normHeadings[];
+    private final boolean displayPlots;
 
 //    public static void main(String args[]) {
 //        new Data_File_Averager().run(null);
 //        System.exit(0);
 //    }
-    public Data_File_Averager(String headings[], String normHeadings[]) {
+    public Data_File_Averager(String[] headings, String[] normHeadings, boolean displayPlots) {
         this.headings = headings;
         this.normHeadings = normHeadings;
+        this.displayPlots = displayPlots;
     }
 
     public void run(String arg) {
@@ -74,9 +77,6 @@ public class Data_File_Averager implements PlugIn {
         cleanDirectory();
         File files[] = directory.listFiles();
         int numOfFiles = files.length;
-//        if (!showDialog()) {
-//            return;
-//        }
         FileReader reader = new FileReader(numOfFiles, headerSize);
         reader.getParamList(files, paramDelim);
         numParams = reader.getNumParams();
@@ -101,7 +101,6 @@ public class Data_File_Averager implements PlugIn {
             truncateData(data, numParams, numOfFiles, VEL_INDEX);
         }
         getExtrema(data, minima, maxima, numParams, numOfFiles);
-//        performAnalysis(data, VEL_INDEX, TIME_INDEX, numOfFiles, files);
         if (normalise) {
             if (normParams == null || normParams.length != numParams) {
                 normParams = new boolean[numParams];
@@ -117,34 +116,18 @@ public class Data_File_Averager implements PlugIn {
 //            normParams = showSelectionDialog(headings, "Specify parameters to be normalised", numParams, normParams);
             normaliseData(data, numOfFiles, numParams, minima, maxima);
         }
-        if (colate) {
-            colateData(directory, headings, numOfFiles, data);
+//        if (colate) {
+//            colateData(directory, headings, numOfFiles, data);
+//        }
+        ArrayList<Double> meanData[] = calcMeanData(directory, headings, numOfFiles, data);
+        if (displayPlots) {
+            plotData(meanData);
         }
-        outputMeanData(directory, headings, numOfFiles, data);
-        aggregateData(directory, headings, numOfFiles, data, numParams, selection);
-//        IJ.saveAs(new ImagePlus("", buildHeatMap(data, 15, 15, VEL_INDEX, LENGTH_INDEX, 32.0, 2.1, -10.0, 0.75)), "TIF", "c:\\users\\barry05\\desktop\\heatmap.tif");
+//        aggregateData(directory, headings, numOfFiles, data, numParams, selection);
         outputFileList(directory, reader.getFilenames(), numOfFiles);
         GenUtils.showDone(this);
     }
 
-//    boolean showDialog() {
-//        GenericDialog gd = new GenericDialog(TITLE);
-////        gd.addNumericField("Header Size", headerSize, 0);
-////        gd.addNumericField("Number of Parameters", numParams, 0);
-//        gd.addCheckbox("Normalise Data?", normalise);
-////        gd.addCheckbox("Truncate Data?", truncate);
-//        gd.addCheckbox("Collate Data?", colate);
-//        gd.showDialog();
-//        if (gd.wasCanceled()) {
-//            return false;
-//        }
-////        headerSize = (int) Math.round(gd.getNextNumber());
-////        numParams = (int) Math.round(gd.getNextNumber());
-//        normalise = gd.getNextBoolean();
-////        truncate = gd.getNextBoolean();
-//        colate = gd.getNextBoolean();
-//        return true;
-//    }
     boolean[] showSelectionDialog(String[] headings, String dialogHeading, int numParams, boolean[] defaults) {
         GenericDialog gd = new GenericDialog(dialogHeading);
         boolean selection[] = new boolean[numParams];
@@ -310,7 +293,7 @@ public class Data_File_Averager implements PlugIn {
         }
     }
 
-    void outputMeanData(File directory, String[] headings, int numOfFiles, ArrayList<Double>[][] data) {
+    ArrayList<Double>[] calcMeanData(File directory, String[] headings, int numOfFiles, ArrayList<Double>[][] data) {
         File thisMeanData;
         PrintWriter thisDataStream;
         try {
@@ -318,15 +301,20 @@ public class Data_File_Averager implements PlugIn {
             thisDataStream = new PrintWriter(new FileOutputStream(thisMeanData));
         } catch (FileNotFoundException e) {
             IJ.error(e.toString());
-            return;
+            return null;
         }
         thisDataStream.println(directory.getAbsolutePath());
         for (String h : headings) {
             thisDataStream.print(h + ", , ");
         }
+        thisDataStream.println("N");
+        for (String h : headings) {
+            thisDataStream.print("Mean,Standard Deviation,");
+        }
         thisDataStream.println();
         boolean cont = true;
         int t = 0;
+        ArrayList<Double>[] meanData = new ArrayList[numParams];
         while (cont) {
             int n = 0;
             for (int i = 0; i < numOfFiles; i++) {
@@ -350,6 +338,10 @@ public class Data_File_Averager implements PlugIn {
                         double mean = DataStatistics.calcMean(thisdata);
                         double stdDev = DataStatistics.calcStdDev(thisdata, n, mean);
                         thisDataStream.print(mean + ", " + stdDev + ", ");
+                        if (meanData[j] == null) {
+                            meanData[j] = new ArrayList();
+                        }
+                        meanData[j].add(mean);
                     } else {
                         thisDataStream.print(", , ");
                     }
@@ -360,6 +352,20 @@ public class Data_File_Averager implements PlugIn {
             }
         }
         thisDataStream.close();
+        return meanData;
+    }
+
+    void plotData(ArrayList<Double> data[]) {
+        for (int i = 1; i < data.length; i++) {
+            double xvals[] = new double[data[0].size()];
+            double yvals[] = new double[data[i].size()];
+            for (int j = 0; j < xvals.length; j++) {
+                xvals[j] = data[0].get(j);
+                yvals[j] = data[i].get(j);
+            }
+            Plot plot = new Plot(headings[i], headings[0], headings[i], xvals, yvals);
+            plot.show();
+        }
     }
 
     void colateData(File directory, String headings[], int numOfFiles, ArrayList<Double>[][] data) {
@@ -458,33 +464,4 @@ public class Data_File_Averager implements PlugIn {
             }
         }
     }
-
-//    ImageStack buildHeatMap(ArrayList<Double>[][] data, int width, int height, int xIndex, int yIndex, double maxX, double maxY, double minX, double minY) {
-//        int stackSize = 360;
-//        ImageStack output = new ImageStack(width, height);
-//        int counts[] = new int[360];
-//        for (int i = 0; i < stackSize; i++) {
-//            ShortProcessor bp = new ShortProcessor(width, height);
-//            bp.setColor(0);
-//            bp.fill();
-//            output.addSlice(bp);
-//        }
-//        for (int i = 0; i < data.length; i++) {
-//            int size = data[i][0].size();
-//            for (int j = 0; j < size && j < stackSize; j++) {
-//                ImageProcessor ip = output.getProcessor(j + 1);
-//                int x = (int) Math.round(width * (data[i][xIndex].get(j) - minX) / (maxX - minX));
-//                int y = (int) Math.round(height * (data[i][yIndex].get(j) - minY) / (maxY - minY));
-//                if (x >= 0 && x < width && y >= 0 && y < height) {
-//                    ip.putPixel(x, y, 1 + ip.get(x, y));
-//                    counts[j]++;
-//                }
-//            }
-//        }
-//        for (int i = 0; i < stackSize; i++) {
-//            (output.getProcessor(i+1)).multiply(Short.MAX_VALUE/counts[i]);
-//        }
-//        
-//        return output;
-//    }
 }
