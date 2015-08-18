@@ -85,8 +85,8 @@ public class DataResampler implements PlugIn {
             double newData[][];
             double dilation = 1.0;
             if (normLength) {
-                double measY = lastNormLength(data, i, Data_File_Averager.LENGTH_INDEX, window);
-                double d = data[i][Data_File_Averager.TIME_INDEX].get(size - 1);
+                double measY = lastNormLength(data, i, DataFileAverager.LENGTH_INDEX, window);
+                double d = data[i][DataFileAverager.TIME_INDEX].get(size - 1);
                 dilation = ((measY - coeffs[1]) / coeffs[0]) / d;
                 newData = new double[numParams][newLength];
             } else {
@@ -97,7 +97,7 @@ public class DataResampler implements PlugIn {
                 double currentData[] = new double[size];
                 for (int k = 0; k < size; k++) {
                     if (normLength) {
-                        if (j == Data_File_Averager.TIME_INDEX) {
+                        if (j == DataFileAverager.TIME_INDEX) {
                             newData[j][k] = data[i][j].get(k) * dilation;
                         } else {
                             newData[j][k] = data[i][j].get(k);

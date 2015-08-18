@@ -36,7 +36,7 @@ import org.apache.commons.io.FilenameUtils;
  *
  * @author barry05
  */
-public class Data_File_Averager implements PlugIn {
+public class DataFileAverager implements PlugIn {
 
     private final String TITLE = "Data Averager";
     private static int headerSize = 1;
@@ -59,12 +59,12 @@ public class Data_File_Averager implements PlugIn {
 //        new Data_File_Averager().run(null);
 //        System.exit(0);
 //    }
-    public Data_File_Averager(String[] headings, String[] normHeadings, boolean displayPlots) {
+    public DataFileAverager(String[] headings, String[] normHeadings, boolean displayPlots) {
         this.headings = headings;
         this.normHeadings = normHeadings;
         this.displayPlots = displayPlots;
     }
-
+   
     public void run(String arg) {
         if (arg == null) {
             directory = Utilities.getFolder(directory, "Select Directory", true);
