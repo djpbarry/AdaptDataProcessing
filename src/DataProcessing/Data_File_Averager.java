@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  *
@@ -49,13 +50,24 @@ public class Data_File_Averager implements PlugIn {
     private final String AGG_DATA = "Aggregated_Data";
     private final String COL_DATA = "Collated_Data";
     private final String MEAN_DATA = "mean_data.csv";
+    private final String headings[];
+    private final String normHeadings[];
 
 //    public static void main(String args[]) {
 //        new Data_File_Averager().run(null);
 //        System.exit(0);
 //    }
+    public Data_File_Averager(String headings[], String normHeadings[]) {
+        this.headings = headings;
+        this.normHeadings = normHeadings;
+    }
+
     public void run(String arg) {
-        directory = Utilities.getFolder(directory, "Select Directory", true);
+        if (arg == null) {
+            directory = Utilities.getFolder(directory, "Select Directory", true);
+        } else {
+            directory = new File(arg);
+        }
         if (directory == null) {
             return;
         }
@@ -77,9 +89,14 @@ public class Data_File_Averager implements PlugIn {
                 selection[i] = true;
             }
         }
-        reader.readData(data, files, paramDelim);
-        String headings[] = reader.getParamsArray();
-        selection = showSelectionDialog(headings, "Specify parameters to be output", numParams, selection);
+        try {
+            reader.readData(data, files, paramDelim);
+        } catch (Exception e) {
+            IJ.log(e.toString());
+            return;
+        }
+//        String headings[] = reader.getParamsArray();
+//        selection = showSelectionDialog(headings, "Specify parameters to be output", numParams, selection);
         if (truncate) {
             truncateData(data, numParams, numOfFiles, VEL_INDEX);
         }
@@ -88,9 +105,16 @@ public class Data_File_Averager implements PlugIn {
         if (normalise) {
             if (normParams == null || normParams.length != numParams) {
                 normParams = new boolean[numParams];
-                System.arraycopy(selection, 0, normParams, 0, numParams);
+                for (int i = 0; i < numParams; i++) {
+                    normParams[i] = false;
+                    for (int j = 0; j < normHeadings.length; j++) {
+                        if (headings[i].compareTo(normHeadings[j]) == 0) {
+                            normParams[i] = true;
+                        }
+                    }
+                }
             }
-            normParams = showSelectionDialog(headings, "Specify parameters to be normalised", numParams, normParams);
+//            normParams = showSelectionDialog(headings, "Specify parameters to be normalised", numParams, normParams);
             normaliseData(data, numOfFiles, numParams, minima, maxima);
         }
         if (colate) {
@@ -339,7 +363,7 @@ public class Data_File_Averager implements PlugIn {
     }
 
     void colateData(File directory, String headings[], int numOfFiles, ArrayList<Double>[][] data) {
-        File colateDir = GenUtils.createDirectory(directory + directoryDelim + COL_DATA);
+        File colateDir = GenUtils.createDirectory(directory + directoryDelim + COL_DATA, false);
         for (int p = 0; p < numParams; p++) {
             if (selection[p]) {
                 File paramFile;
@@ -374,7 +398,7 @@ public class Data_File_Averager implements PlugIn {
 
     void aggregateData(File directory, String[] headings, int numOfFiles, ArrayList<Double>[][] data,
             int numParams, boolean[] selection) {
-        File aggDir = GenUtils.createDirectory(directory + directoryDelim + AGG_DATA);
+        File aggDir = GenUtils.createDirectory(directory + directoryDelim + AGG_DATA, false);
         File paramFile;
         PrintWriter paramStream;
         try {
@@ -427,10 +451,12 @@ public class Data_File_Averager implements PlugIn {
     }
 
     private void cleanDirectory() {
-        FileUtils.deleteQuietly(new File(directory + directoryDelim + FILE_LIST));
-        FileUtils.deleteQuietly(new File(directory + directoryDelim + MEAN_DATA));
-        FileUtils.deleteQuietly(new File(directory + directoryDelim + AGG_DATA));
-        FileUtils.deleteQuietly(new File(directory + directoryDelim + COL_DATA));
+        File files[] = directory.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (!FilenameUtils.getBaseName(files[i].getAbsolutePath()).contains("bleb_data")) {
+                FileUtils.deleteQuietly(files[i]);
+            }
+        }
     }
 
 //    ImageStack buildHeatMap(ArrayList<Double>[][] data, int width, int height, int xIndex, int yIndex, double maxX, double maxY, double minX, double minY) {

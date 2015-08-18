@@ -69,7 +69,7 @@ public class FileReader {
                 }
                 br.close();
             } catch (Exception e) {
-                IJ.error(e.toString());
+                IJ.log(e.toString());
             }
         }
         Arrays.sort(filenames);
@@ -129,7 +129,7 @@ public class FileReader {
             }
             br.close();
         } catch (Exception e) {
-            IJ.error(e.toString());
+            IJ.log(e.toString());
         }
         return Double.NaN;
     }
