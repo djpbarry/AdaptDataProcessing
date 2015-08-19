@@ -92,7 +92,7 @@ public class FileReader {
         Scanner scanner = new Scanner(headings).useDelimiter(delimiter);
         ArrayList<String> headingsArray = new ArrayList();
         while (scanner.hasNext()) {
-            headingsArray.add(scanner.next());
+            headingsArray.add(scanner.next().trim());
         }
         return headingsArray;
     }
@@ -144,7 +144,7 @@ public class FileReader {
                 String paramLine = br.readLine();
                 Scanner scan = new Scanner(paramLine).useDelimiter(delimiter);
                 while (scan.hasNext()) {
-                    String thisParam = scan.next();
+                    String thisParam = scan.next().trim();
                     if (!paramNames.contains(thisParam)) {
                         paramNames.add(thisParam);
                     }

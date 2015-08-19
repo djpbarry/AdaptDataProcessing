@@ -49,77 +49,77 @@ public class DataResampler implements PlugIn {
 //    }
 
     public void run(String arg) {
-        String delimiter = GenUtils.getDelimiter();
-        File init = null;
-        if (IJ.getInstance() != null) {
-            init = new File(IJ.getDirectory("current"));
-        }
-        File inDir = Utilities.getFolder(init, "Select Directory", true);
-        File files[] = inDir.listFiles();
-        int numOfFiles = files.length;
-        if (!showDialog()) {
-            return;
-        }
-        File outDir = new File(GenUtils.openResultsDirectory(inDir.getAbsolutePath()
-                + delimiter + "Resampled", delimiter));
-        ArrayList<Double> data[][] = new ArrayList[numOfFiles][numParams];
-        FileReader reader = new FileReader(numOfFiles, headerSize);
-        reader.getParamList(files, ",\\s");
-        reader.readData(data, files, ",\\s");
-        String headings = reader.getParamString();
-        String filenames[] = reader.getFilenames();
-
-        for (int i = 0; i < numOfFiles; i++) {
-            File reSampledData;
-            PrintWriter reSampledDataStream;
-            try {
-                reSampledData = new File(outDir + delimiter + getFileName(files[i]) + "_resampled.txt");
-                reSampledDataStream = new PrintWriter(new FileOutputStream(reSampledData));
-            } catch (FileNotFoundException e) {
-                IJ.error(e.toString());
-                return;
-            }
-            double oldSampleRate = data[i][0].get(1) - data[i][0].get(0);
-            int size = data[i][0].size();
-            int newLength = size;
-            double newData[][];
-            double dilation = 1.0;
-            if (normLength) {
-                double measY = lastNormLength(data, i, DataFileAverager.LENGTH_INDEX, window);
-                double d = data[i][DataFileAverager.TIME_INDEX].get(size - 1);
-                dilation = ((measY - coeffs[1]) / coeffs[0]) / d;
-                newData = new double[numParams][newLength];
-            } else {
-                newLength = (int) Math.round(size * oldSampleRate / newSampleRate);
-                newData = new double[numParams][newLength];
-            }
-            for (int j = 0; j < numParams; j++) {
-                double currentData[] = new double[size];
-                for (int k = 0; k < size; k++) {
-                    if (normLength) {
-                        if (j == DataFileAverager.TIME_INDEX) {
-                            newData[j][k] = data[i][j].get(k) * dilation;
-                        } else {
-                            newData[j][k] = data[i][j].get(k);
-                        }
-                    } else {
-                        currentData[k] = data[i][j].get(k);
-                    }
-                }
-                if (!normLength) {
-                    newData[j] = DSPProcessor.upScale(currentData, newLength, false);
-                }
-            }
-            reSampledDataStream.println(filenames[i]);
-            reSampledDataStream.println(headings);
-            for (int l = 0; l < newLength; l++) {
-                for (int m = 0; m < numParams; m++) {
-                    reSampledDataStream.print(newData[m][l] + "\t");
-                }
-                reSampledDataStream.println();
-            }
-            reSampledDataStream.close();
-        }
+//        String delimiter = GenUtils.getDelimiter();
+//        File init = null;
+//        if (IJ.getInstance() != null) {
+//            init = new File(IJ.getDirectory("current"));
+//        }
+//        File inDir = Utilities.getFolder(init, "Select Directory", true);
+//        File files[] = inDir.listFiles();
+//        int numOfFiles = files.length;
+//        if (!showDialog()) {
+//            return;
+//        }
+//        File outDir = new File(GenUtils.openResultsDirectory(inDir.getAbsolutePath()
+//                + delimiter + "Resampled", delimiter));
+//        ArrayList<Double> data[][] = new ArrayList[numOfFiles][numParams];
+//        FileReader reader = new FileReader(numOfFiles, headerSize);
+//        reader.getParamList(files, ",\\s");
+//        reader.readData(data, files, ",\\s");
+//        String headings = reader.getParamString();
+//        String filenames[] = reader.getFilenames();
+//
+//        for (int i = 0; i < numOfFiles; i++) {
+//            File reSampledData;
+//            PrintWriter reSampledDataStream;
+//            try {
+//                reSampledData = new File(outDir + delimiter + getFileName(files[i]) + "_resampled.txt");
+//                reSampledDataStream = new PrintWriter(new FileOutputStream(reSampledData));
+//            } catch (FileNotFoundException e) {
+//                IJ.error(e.toString());
+//                return;
+//            }
+//            double oldSampleRate = data[i][0].get(1) - data[i][0].get(0);
+//            int size = data[i][0].size();
+//            int newLength = size;
+//            double newData[][];
+//            double dilation = 1.0;
+//            if (normLength) {
+//                double measY = lastNormLength(data, i, DataFileAverager.LENGTH_INDEX, window);
+//                double d = data[i][DataFileAverager.timeIndex].get(size - 1);
+//                dilation = ((measY - coeffs[1]) / coeffs[0]) / d;
+//                newData = new double[numParams][newLength];
+//            } else {
+//                newLength = (int) Math.round(size * oldSampleRate / newSampleRate);
+//                newData = new double[numParams][newLength];
+//            }
+//            for (int j = 0; j < numParams; j++) {
+//                double currentData[] = new double[size];
+//                for (int k = 0; k < size; k++) {
+//                    if (normLength) {
+//                        if (j == DataFileAverager.timeIndex) {
+//                            newData[j][k] = data[i][j].get(k) * dilation;
+//                        } else {
+//                            newData[j][k] = data[i][j].get(k);
+//                        }
+//                    } else {
+//                        currentData[k] = data[i][j].get(k);
+//                    }
+//                }
+//                if (!normLength) {
+//                    newData[j] = DSPProcessor.upScale(currentData, newLength, false);
+//                }
+//            }
+//            reSampledDataStream.println(filenames[i]);
+//            reSampledDataStream.println(headings);
+//            for (int l = 0; l < newLength; l++) {
+//                for (int m = 0; m < numParams; m++) {
+//                    reSampledDataStream.print(newData[m][l] + "\t");
+//                }
+//                reSampledDataStream.println();
+//            }
+//            reSampledDataStream.close();
+//        }
     }
 
     boolean showDialog() {
