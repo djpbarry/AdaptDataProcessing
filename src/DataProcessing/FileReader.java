@@ -36,6 +36,7 @@ public class FileReader {
 //    private String headings;
     private String filenames[];
     private ArrayList<String> paramNames;
+    private String charset = "UTF-8";
 
     public FileReader() {
     }
@@ -50,7 +51,7 @@ public class FileReader {
     public void readData(ArrayList<Double>[][] data, File[] files, String delimiter) {
         for (int i = 0; i < numOfFiles; i++) {
             try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i])));
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charset));
                 filenames[i] = br.readLine();
                 ArrayList<String> thisParams = getParamsArray(br.readLine(), delimiter);
                 int numThisParams = thisParams.size();
@@ -137,7 +138,7 @@ public class FileReader {
     public void getParamList(File[] files, String delimiter) {
         for (int i = 0; i < numOfFiles; i++) {
             try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i])));
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charset));
                 for (int j = 0; j < headerSize; j++) {
                     br.readLine();
                 }
