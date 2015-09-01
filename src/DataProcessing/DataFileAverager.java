@@ -486,7 +486,9 @@ public class DataFileAverager implements PlugIn {
     private void cleanDirectory() {
         File files[] = directory.listFiles();
         for (int i = 0; i < files.length; i++) {
-            if (!FilenameUtils.getBaseName(files[i].getAbsolutePath()).contains("bleb_data")) {
+            String filename = FilenameUtils.getBaseName(files[i].getAbsolutePath());
+            if (filename.contains(FilenameUtils.getBaseName(MEAN_DATA))
+                    || filename.contains(FilenameUtils.getBaseName(FILE_LIST))) {
                 FileUtils.deleteQuietly(files[i]);
             }
         }
