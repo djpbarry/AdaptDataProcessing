@@ -55,7 +55,7 @@ public class DetectionMapAnalyser implements PlugIn {
         File maps[] = mapDir.listFiles();
         File plots[] = plotDir.listFiles();
         int size = plots.length;
-        double frameRate = getFrameRate(directory, ".params") / 60.0;
+//        double frameRate = getFrameRate(directory, ".params") / 60.0;
         File resultsDir = new File(GenUtils.openResultsDirectory(directory.getAbsolutePath()
                 + delimiter + "Plot_SD_Sigs", delimiter));
         String headings[] = {"Time_(s)", "Normalised_Signal_SD"};
@@ -64,7 +64,7 @@ public class DetectionMapAnalyser implements PlugIn {
             if (index >= 0) {
                 ImageProcessor ip = (IJ.openImage(maps[getMapIndex(maps, index, '_', '_')].getAbsolutePath())).getProcessor();
                 double sd[] = getMapSDSig(ip, stats.mean);
-                generateFile(resultsDir, sd, "Sig_SD_Plot_" + index + ".txt", headings, frameRate);
+//                generateFile(resultsDir, sd, "Sig_SD_Plot_" + index + ".txt", headings, frameRate);
                 IJ.saveAs((new ImagePlus("", generateCorrMap(ip, 5, 1))), "TIF",
                         resultsDir.getAbsolutePath() + delimiter + "CorrMap_" + index + ".tif");
             }
@@ -186,10 +186,10 @@ public class DetectionMapAnalyser implements PlugIn {
      * @param filename
      * @return
      */
-    double getFrameRate(File dir, String filename) {
-        File params = new File(dir.getAbsolutePath() + delimiter + filename);
-        return (new FileReader()).readParam(params, 1, "timeRes");
-    }
+//    double getFrameRate(File dir, String filename) {
+//        File params = new File(dir.getAbsolutePath() + delimiter + filename);
+//        return (new FileReader()).readParam(params, 1, "timeRes");
+//    }
 
     int correlateSingleCol(ImageProcessor map1, ImageProcessor map2, int yposc1,
             int radius, int col, int colstep) {

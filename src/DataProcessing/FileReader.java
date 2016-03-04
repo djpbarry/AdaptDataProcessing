@@ -16,10 +16,11 @@
  */
 package DataProcessing;
 
-import ij.IJ;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -50,30 +51,26 @@ public class FileReader {
         this.charSet = charSet;
     }
 
-    public void readData(ArrayList<Double>[][] data, File[] files, String delimiter) {
+    public void readData(ArrayList<Double>[][] data, File[] files, String delimiter) throws FileNotFoundException, IOException {
         for (int i = 0; i < numOfFiles; i++) {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charSet));
-                filenames[i] = br.readLine();
-                ArrayList<String> thisParams = getParamsArray(br.readLine(), delimiter);
-                int numThisParams = thisParams.size();
-                String line = br.readLine();
-                while (line != null) {
-                    Scanner scan = new Scanner(line).useDelimiter(delimiter + "\\s*");
-                    for (int k = 0; k < numThisParams; k++) {
-                        int j = getParamIndex(thisParams.get(k), paramNames);
-                        if (data[i][j] == null) {
-                            data[i][j] = new ArrayList();
-                        }
-                        double val = scan.nextDouble();
-                        data[i][j].add(val);
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charSet));
+            filenames[i] = br.readLine();
+            ArrayList<String> thisParams = getParamsArray(br.readLine(), delimiter);
+            int numThisParams = thisParams.size();
+            String line = br.readLine();
+            while (line != null) {
+                Scanner scan = new Scanner(line).useDelimiter(delimiter + "\\s*");
+                for (int k = 0; k < numThisParams; k++) {
+                    int j = getParamIndex(thisParams.get(k), paramNames);
+                    if (data[i][j] == null) {
+                        data[i][j] = new ArrayList();
                     }
-                    line = br.readLine();
+                    double val = scan.nextDouble();
+                    data[i][j].add(val);
                 }
-                br.close();
-            } catch (Exception e) {
-                IJ.log(e.toString());
+                line = br.readLine();
             }
+            br.close();
         }
         Arrays.sort(filenames);
     }
@@ -109,53 +106,45 @@ public class FileReader {
         return paramString;
     }
 
-    public double readParam(File paramFile, int headerSize, String paramName) {
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(paramFile)));
-            for (int j = 0; j < headerSize; j++) {
-                br.readLine();
-            }
-            String line = br.readLine();
-            while (line != null) {
-                Scanner scan = new Scanner(line);
-                if (paramName.equalsIgnoreCase(scan.next())) {
-                    double val;
-                    try {
-                        val = scan.nextDouble();
-                    } catch (Exception e) {
-                        scan.next();
-                        val = scan.nextDouble();
-                    }
-                    return val;
-                }
-                line = br.readLine();
-            }
-            br.close();
-        } catch (Exception e) {
-            IJ.log(e.toString());
+    public double readParam(File paramFile, int headerSize, String paramName) throws FileNotFoundException, IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(paramFile)));
+        for (int j = 0; j < headerSize; j++) {
+            br.readLine();
         }
+        String line = br.readLine();
+        while (line != null) {
+            Scanner scan = new Scanner(line);
+            if (paramName.equalsIgnoreCase(scan.next())) {
+                double val;
+                try {
+                    val = scan.nextDouble();
+                } catch (Exception e) {
+                    scan.next();
+                    val = scan.nextDouble();
+                }
+                return val;
+            }
+            line = br.readLine();
+        }
+        br.close();
         return Double.NaN;
     }
 
-    public void getParamList(File[] files, String delimiter) {
+    public void getParamList(File[] files, String delimiter) throws FileNotFoundException, IOException {
         for (int i = 0; i < numOfFiles; i++) {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charSet));
-                for (int j = 0; j < headerSize; j++) {
-                    br.readLine();
-                }
-                String paramLine = br.readLine();
-                Scanner scan = new Scanner(paramLine).useDelimiter(delimiter);
-                while (scan.hasNext()) {
-                    String thisParam = scan.next().trim();
-                    if (!paramNames.contains(thisParam)) {
-                        paramNames.add(thisParam);
-                    }
-                }
-                br.close();
-            } catch (Exception e) {
-                IJ.error(e.toString());
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charSet));
+            for (int j = 0; j < headerSize; j++) {
+                br.readLine();
             }
+            String paramLine = br.readLine();
+            Scanner scan = new Scanner(paramLine).useDelimiter(delimiter);
+            while (scan.hasNext()) {
+                String thisParam = scan.next().trim();
+                if (!paramNames.contains(thisParam)) {
+                    paramNames.add(thisParam);
+                }
+            }
+            br.close();
         }
     }
 
