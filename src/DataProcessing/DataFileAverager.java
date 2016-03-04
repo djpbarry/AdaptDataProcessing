@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
@@ -52,22 +53,18 @@ public class DataFileAverager implements PlugIn {
     private final String MEAN_DATA = "mean_data.csv";
     private final String VEL;
     private final String TIME;
-    private final String ZEROED_TIME;
     private String headings[];
     private final String NORM_HEADINGS[];
     private final boolean DISPLAY_PLOTS;
+    private final Charset charSet;
 
-//    public static void main(String args[]) {
-//        new Data_File_Averager().run(null);
-//        System.exit(0);
-//    }
-    public DataFileAverager(String[] headings, String[] normHeadings, boolean displayPlots, String Vel, String Time, String zeroTime) {
+    public DataFileAverager(String[] headings, String[] normHeadings, boolean displayPlots, String Vel, String Time, Charset charSet) {
         this.headings = headings;
         this.NORM_HEADINGS = normHeadings;
         this.DISPLAY_PLOTS = displayPlots;
         this.VEL = Vel;
         this.TIME = Time;
-        this.ZEROED_TIME = zeroTime;
+        this.charSet = charSet;
     }
 
     public void run(String arg) {
@@ -82,7 +79,7 @@ public class DataFileAverager implements PlugIn {
         cleanDirectory();
         File files[] = directory.listFiles();
         int numOfFiles = files.length;
-        FileReader reader = new FileReader(numOfFiles, HEAD_SIZE);
+        FileReader reader = new FileReader(numOfFiles, HEAD_SIZE, charSet);
         reader.getParamList(files, PARAM_DELIM);
         numParams = reader.getNumParams();
         ArrayList<Double> data[][] = new ArrayList[numOfFiles][numParams];
@@ -141,15 +138,8 @@ public class DataFileAverager implements PlugIn {
             if (headings[i].compareTo(VEL) == 0) {
                 velIndex = i;
             }
-            if (headings[i].compareTo(ZEROED_TIME) == 0) {
+            if (headings[i].compareTo(TIME) == 0) {
                 timeIndex = i;
-            }
-        }
-        if (timeIndex < 0) {
-            for (int i = 0; i < headings.length; i++) {
-                if (headings[i].compareTo(TIME) == 0) {
-                    timeIndex = i;
-                }
             }
         }
     }

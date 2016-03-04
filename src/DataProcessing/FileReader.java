@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -36,22 +37,23 @@ public class FileReader {
 //    private String headings;
     private String filenames[];
     private ArrayList<String> paramNames;
-    private String charset = "UTF-8";
+    private Charset charSet;
 
     public FileReader() {
     }
 
-    public FileReader(int numOfFiles, int headerSize) {
+    public FileReader(int numOfFiles, int headerSize, Charset charSet) {
         this.headerSize = headerSize;
         this.numOfFiles = numOfFiles;
         this.filenames = new String[numOfFiles];
         this.paramNames = new ArrayList();
+        this.charSet = charSet;
     }
 
     public void readData(ArrayList<Double>[][] data, File[] files, String delimiter) {
         for (int i = 0; i < numOfFiles; i++) {
             try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charset));
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charSet));
                 filenames[i] = br.readLine();
                 ArrayList<String> thisParams = getParamsArray(br.readLine(), delimiter);
                 int numThisParams = thisParams.size();
@@ -138,7 +140,7 @@ public class FileReader {
     public void getParamList(File[] files, String delimiter) {
         for (int i = 0; i < numOfFiles; i++) {
             try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charset));
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charSet));
                 for (int j = 0; j < headerSize; j++) {
                     br.readLine();
                 }
