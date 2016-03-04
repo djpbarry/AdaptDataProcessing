@@ -75,57 +75,77 @@ public class DataFileAverager {
         if (directory == null) {
             return;
         }
+        cleanDirectory();
+        File files[] = directory.listFiles();
+        int numOfFiles = files.length;
+        FileReader reader = new FileReader(numOfFiles, HEAD_SIZE, charSet);
         try {
-            cleanDirectory();
-            File files[] = directory.listFiles();
-            int numOfFiles = files.length;
-            FileReader reader = new FileReader(numOfFiles, HEAD_SIZE, charSet);
             reader.getParamList(files, PARAM_DELIM);
-            numParams = reader.getNumParams();
-            ArrayList<Double> data[][] = new ArrayList[numOfFiles][numParams];
-            double maxima[][] = new double[numOfFiles][numParams];
-            double minima[][] = new double[numOfFiles][numParams];
-            if (selection == null || selection.length != numParams) {
-                selection = new boolean[numParams];
-                for (int i = 0; i < numParams; i++) {
-                    selection[i] = true;
-                }
+        } catch (Exception e) {
+            IJ.log("Failed to read parameter list.");
+            IJ.log(e.getMessage());
+            return;
+        }
+        numParams = reader.getNumParams();
+        ArrayList<Double> data[][] = new ArrayList[numOfFiles][numParams];
+        double maxima[][] = new double[numOfFiles][numParams];
+        double minima[][] = new double[numOfFiles][numParams];
+        if (selection == null || selection.length != numParams) {
+            selection = new boolean[numParams];
+            for (int i = 0; i < numParams; i++) {
+                selection[i] = true;
             }
+        }
+        try {
             reader.readData(data, files, PARAM_DELIM);
-            if (headings == null) {
-                headings = reader.getParamsArray();
+        } catch (Exception e) {
+            IJ.log("Failed to read data files.");
+            IJ.log(e.getMessage());
+            return;
+        }
+        if (headings == null) {
+            headings = reader.getParamsArray();
 //            selection = showSelectionDialog(headings, "Specify parameters to be output", numParams, selection);
-            }
-            getParamIndices(headings);
-            if (TRUNC) {
-                truncateData(data, numParams, numOfFiles, velIndex);
-            }
-            getExtrema(data, minima, maxima, numParams, numOfFiles);
-            if (NORM) {
-                if (normParams == null || normParams.length != numParams) {
-                    normParams = new boolean[numParams];
-                    for (int i = 0; i < numParams; i++) {
-                        normParams[i] = false;
-                        for (int j = 0; j < NORM_HEADINGS.length; j++) {
-                            if (headings[i].compareTo(NORM_HEADINGS[j]) == 0) {
-                                normParams[i] = true;
-                            }
+        }
+        getParamIndices(headings);
+        if (TRUNC) {
+            truncateData(data, numParams, numOfFiles, velIndex);
+        }
+        getExtrema(data, minima, maxima, numParams, numOfFiles);
+        if (NORM) {
+            if (normParams == null || normParams.length != numParams) {
+                normParams = new boolean[numParams];
+                for (int i = 0; i < numParams; i++) {
+                    normParams[i] = false;
+                    for (int j = 0; j < NORM_HEADINGS.length; j++) {
+                        if (headings[i].compareTo(NORM_HEADINGS[j]) == 0) {
+                            normParams[i] = true;
                         }
                     }
                 }
-//            normParams = showSelectionDialog(headings, "Specify parameters to be normalised", numParams, normParams);
-                normaliseData(data, numOfFiles, numParams, minima, maxima);
             }
+//            normParams = showSelectionDialog(headings, "Specify parameters to be normalised", numParams, normParams);
+            normaliseData(data, numOfFiles, numParams, minima, maxima);
+        }
 //        if (colate) {
 //            colateData(directory, headings, numOfFiles, data);
 //        }
-            ArrayList<Double> meanData[] = calcMeanData(directory, headings, numOfFiles, data);
-            if (DISPLAY_PLOTS) {
-                plotData(meanData);
-            }
+        ArrayList<Double> meanData[];
+        try {
+            meanData = calcMeanData(directory, headings, numOfFiles, data);
+        } catch (Exception e) {
+            IJ.log("Failed to calculate data mean.");
+            IJ.log(e.getMessage());
+            return;
+        }
+        if (DISPLAY_PLOTS) {
+            plotData(meanData);
+        }
 //        aggregateData(directory, headings, numOfFiles, data, numParams, selection);
+        try {
             outputFileList(directory, reader.getFilenames(), numOfFiles);
         } catch (Exception e) {
+            IJ.log("Failed to generate output files.");
             IJ.log(e.getMessage());
             return;
         }
