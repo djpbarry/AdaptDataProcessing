@@ -24,12 +24,14 @@ import ij.gui.Plot;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 /**
  *
@@ -76,14 +78,14 @@ public class DataFileAverager {
             return;
         }
         cleanDirectory();
-        File files[] = directory.listFiles();
+        File files[] = directory.listFiles((FilenameFilter)(new SuffixFileFilter(".csv")));
         int numOfFiles = files.length;
         FileReader reader = new FileReader(numOfFiles, HEAD_SIZE, charSet);
         try {
             reader.getParamList(files, PARAM_DELIM);
         } catch (Exception e) {
             IJ.log("Failed to read parameter list.");
-            IJ.log(e.getMessage());
+            IJ.log(e.toString());
             return;
         }
         numParams = reader.getNumParams();
@@ -100,7 +102,7 @@ public class DataFileAverager {
             reader.readData(data, files, PARAM_DELIM);
         } catch (Exception e) {
             IJ.log("Failed to read data files.");
-            IJ.log(e.getMessage());
+            IJ.log(e.toString());
             return;
         }
         if (headings == null) {
@@ -135,7 +137,7 @@ public class DataFileAverager {
             meanData = calcMeanData(directory, headings, numOfFiles, data);
         } catch (Exception e) {
             IJ.log("Failed to calculate data mean.");
-            IJ.log(e.getMessage());
+            IJ.log(e.toString());
             return;
         }
         if (DISPLAY_PLOTS) {
@@ -146,7 +148,7 @@ public class DataFileAverager {
             outputFileList(directory, reader.getFilenames(), numOfFiles);
         } catch (Exception e) {
             IJ.log("Failed to generate output files.");
-            IJ.log(e.getMessage());
+            IJ.log(e.toString());
             return;
         }
         GenUtils.showDone(this);

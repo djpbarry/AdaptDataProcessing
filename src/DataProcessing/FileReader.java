@@ -16,6 +16,7 @@
  */
 package DataProcessing;
 
+import ij.IJ;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,19 +57,21 @@ public class FileReader {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charSet));
             filenames[i] = br.readLine();
             ArrayList<String> thisParams = getParamsArray(br.readLine(), delimiter);
-            int numThisParams = thisParams.size();
-            String line = br.readLine();
-            while (line != null) {
-                Scanner scan = new Scanner(line).useDelimiter(delimiter + "\\s*");
-                for (int k = 0; k < numThisParams; k++) {
-                    int j = getParamIndex(thisParams.get(k), paramNames);
-                    if (data[i][j] == null) {
-                        data[i][j] = new ArrayList();
+            if (thisParams != null) {
+                int numThisParams = thisParams.size();
+                String line = br.readLine();
+                while (line != null) {
+                    Scanner scan = new Scanner(line).useDelimiter(delimiter + "\\s*");
+                    for (int k = 0; k < numThisParams; k++) {
+                        int j = getParamIndex(thisParams.get(k), paramNames);
+                        if (data[i][j] == null) {
+                            data[i][j] = new ArrayList();
+                        }
+                        double val = scan.nextDouble();
+                        data[i][j].add(val);
                     }
-                    double val = scan.nextDouble();
-                    data[i][j].add(val);
+                    line = br.readLine();
                 }
-                line = br.readLine();
             }
             br.close();
         }
@@ -89,12 +92,16 @@ public class FileReader {
     }
 
     public ArrayList<String> getParamsArray(String headings, String delimiter) {
-        Scanner scanner = new Scanner(headings).useDelimiter(delimiter);
-        ArrayList<String> headingsArray = new ArrayList();
-        while (scanner.hasNext()) {
-            headingsArray.add(scanner.next().trim());
+        if (headings != null) {
+            Scanner scanner = new Scanner(headings).useDelimiter(delimiter);
+            ArrayList<String> headingsArray = new ArrayList();
+            while (scanner.hasNext()) {
+                headingsArray.add(scanner.next().trim());
+            }
+            return headingsArray;
+        } else {
+            return null;
         }
-        return headingsArray;
     }
 
     public String getParamString() {
@@ -137,11 +144,13 @@ public class FileReader {
                 br.readLine();
             }
             String paramLine = br.readLine();
-            Scanner scan = new Scanner(paramLine).useDelimiter(delimiter);
-            while (scan.hasNext()) {
-                String thisParam = scan.next().trim();
-                if (!paramNames.contains(thisParam)) {
-                    paramNames.add(thisParam);
+            if (paramLine != null) {
+                Scanner scan = new Scanner(paramLine).useDelimiter(delimiter);
+                while (scan.hasNext()) {
+                    String thisParam = scan.next().trim();
+                    if (!paramNames.contains(thisParam)) {
+                        paramNames.add(thisParam);
+                    }
                 }
             }
             br.close();
