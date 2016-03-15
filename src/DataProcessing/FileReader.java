@@ -48,7 +48,7 @@ public class FileReader {
         this.headerSize = headerSize;
         this.numOfFiles = numOfFiles;
         this.filenames = new String[numOfFiles];
-        this.paramNames = new ArrayList();
+        this.paramNames = new ArrayList<String>();
         this.charSet = charSet;
     }
 
@@ -65,7 +65,7 @@ public class FileReader {
                     for (int k = 0; k < numThisParams; k++) {
                         int j = getParamIndex(thisParams.get(k), paramNames);
                         if (data[i][j] == null) {
-                            data[i][j] = new ArrayList();
+                            data[i][j] = new ArrayList<Double>();
                         }
                         double val = scan.nextDouble();
                         data[i][j].add(val);
@@ -94,7 +94,7 @@ public class FileReader {
     public ArrayList<String> getParamsArray(String headings, String delimiter) {
         if (headings != null) {
             Scanner scanner = new Scanner(headings).useDelimiter(delimiter);
-            ArrayList<String> headingsArray = new ArrayList();
+            ArrayList<String> headingsArray = new ArrayList<String>();
             while (scanner.hasNext()) {
                 headingsArray.add(scanner.next().trim());
             }

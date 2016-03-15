@@ -368,7 +368,7 @@ public class DataFileAverager {
                         double stdDev = DataStatistics.calcStdDev(thisdata, n, mean);
                         thisDataStream.print(mean + ", " + stdDev + ", ");
                         if (meanData[j] == null) {
-                            meanData[j] = new ArrayList();
+                            meanData[j] = new ArrayList<Double>();
                         }
                         meanData[j].add(mean);
                     } else {
