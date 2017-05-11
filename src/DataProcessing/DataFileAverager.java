@@ -69,16 +69,20 @@ public class DataFileAverager {
     }
 
     public void run(String dirName) {
-        if (dirName == null) {
-            directory = Utilities.getFolder(directory, "Select Directory", true);
-        } else {
-            directory = new File(dirName);
+        try {
+            if (dirName == null) {
+                directory = Utilities.getFolder(directory, "Select Directory", true);
+            } else {
+                directory = new File(dirName);
+            }
+        } catch (Exception e) {
+            GenUtils.error("Could not open directory.");
         }
         if (directory == null) {
             return;
         }
         cleanDirectory();
-        File files[] = directory.listFiles((FilenameFilter)(new SuffixFileFilter(".csv")));
+        File files[] = directory.listFiles((FilenameFilter) (new SuffixFileFilter(".csv")));
         int numOfFiles = files.length;
         FileReader reader = new FileReader(numOfFiles, HEAD_SIZE, charSet);
         try {

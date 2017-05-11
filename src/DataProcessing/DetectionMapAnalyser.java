@@ -42,12 +42,16 @@ public class DetectionMapAnalyser implements PlugIn {
 //    public static void main(String args[]) {
 //        (new Detection_Map_Analyser()).run(null);
 //    }
-    
     public DetectionMapAnalyser() {
     }
 
     public void run(String arg) {
-        directory = Utilities.getFolder(directory, "Select Folder", true);
+        try {
+            directory = Utilities.getFolder(directory, "Select Folder", true);
+        } catch (Exception e) {
+            GenUtils.error("Failed to open directory.");
+            return;
+        }
         ImageProcessor signalMap = (IJ.openImage(directory.getAbsolutePath() + delimiter + "SignalMap.tif")).getProcessor();
         ImageStatistics stats = signalMap.getStatistics();
         File mapDir = new File(directory.getAbsolutePath() + delimiter + "Maps");
@@ -57,7 +61,7 @@ public class DetectionMapAnalyser implements PlugIn {
         int size = plots.length;
 //        double frameRate = getFrameRate(directory, ".params") / 60.0;
         File resultsDir = new File(GenUtils.openResultsDirectory(directory.getAbsolutePath()
-                + delimiter + "Plot_SD_Sigs", delimiter));
+                + delimiter + "Plot_SD_Sigs"));
         String headings[] = {"Time_(s)", "Normalised_Signal_SD"};
         for (int i = 0; i < size; i++) {
             int index = getNumber(plots[i].getName(), '_', '.');
@@ -190,7 +194,6 @@ public class DetectionMapAnalyser implements PlugIn {
 //        File params = new File(dir.getAbsolutePath() + delimiter + filename);
 //        return (new FileReader()).readParam(params, 1, "timeRes");
 //    }
-
     int correlateSingleCol(ImageProcessor map1, ImageProcessor map2, int yposc1,
             int radius, int col, int colstep) {
         double mean1 = map1.getStatistics().mean;
