@@ -93,7 +93,7 @@ public class DataFileAverager {
             return;
         }
         numParams = reader.getNumParams();
-        ArrayList<Double> data[][] = new ArrayList[numOfFiles][numParams];
+        ArrayList<ArrayList<ArrayList<Double>>> data = new ArrayList<>();
         double maxima[][] = new double[numOfFiles][numParams];
         double minima[][] = new double[numOfFiles][numParams];
         if (selection == null || selection.length != numParams) {
@@ -136,7 +136,7 @@ public class DataFileAverager {
 //        if (colate) {
 //            colateData(directory, headings, numOfFiles, data);
 //        }
-        ArrayList<Double> meanData[];
+        ArrayList<ArrayList<Double>> meanData;
         try {
             meanData = calcMeanData(directory, headings, numOfFiles, data);
         } catch (Exception e) {
@@ -238,21 +238,21 @@ public class DataFileAverager {
         }
     }
 
-    void truncateData(ArrayList<Double> data[][], int numParams, int numOfFiles, int VEL_INDEX) {
+    void truncateData(ArrayList<ArrayList<ArrayList<Double>>> data, int numParams, int numOfFiles, int VEL_INDEX) {
         for (int i = 0; i < numOfFiles; i++) {
             boolean negvel = false, posvel = false, end = false;
             int index = 0;
-            int size = data[i][0].size();
+            int size = data.get(i).get(0).size();
             while (!end && index < size) {
                 boolean nan = false;
                 for (int k = 0; k < numParams; k++) {
                     if (selection[k]) {
-                        if (data[i][k] != null) {
-                            nan = nan || Double.isNaN(data[i][k].get(index));
+                        if (data.get(i).get(k) != null) {
+                            nan = nan || Double.isNaN(data.get(i).get(k).get(index));
                         }
                     }
                 }
-                double vel = data[i][VEL_INDEX].get(index);
+                double vel = data.get(i).get(VEL_INDEX).get(index);
                 if (!nan && !(negvel && vel >= 0.0)) {
                     if (posvel && vel < 0.0) {
                         negvel = true;
@@ -261,8 +261,8 @@ public class DataFileAverager {
                     }
                 } else {
                     for (int k = 0; k < numParams; k++) {
-                        if (data[i][k] != null) {
-                            removeElements(data[i][k], index, size - 1);
+                        if (data.get(i).get(k) != null) {
+                            removeElements(data.get(i).get(k), index, size - 1);
                         }
                     }
                     end = true;
@@ -272,17 +272,17 @@ public class DataFileAverager {
         }
     }
 
-    void getExtrema(ArrayList<Double> data[][], double[][] minima, double[][] maxima, int numParams, int numOfFiles) {
+    void getExtrema(ArrayList<ArrayList<ArrayList<Double>>> data, double[][] minima, double[][] maxima, int numParams, int numOfFiles) {
         for (int i = 0; i < numOfFiles; i++) {
             Arrays.fill(maxima[i], -Double.MAX_VALUE);
             Arrays.fill(minima[i], Double.MAX_VALUE);
-            if (data[i][0] != null) {
-                int size = data[i][0].size();
+            if (data.get(i).get(0) != null) {
+                int size = data.get(i).get(0).size();
                 for (int m = 0; m < size; m++) {
                     for (int k = 0; k < numParams; k++) {
                         if (selection[k]) {
-                            if (data[i][k] != null) {
-                                double val = data[i][k].get(m);
+                            if (data.get(i).get(k) != null) {
+                                double val = data.get(i).get(k).get(m);
                                 if (val > maxima[i][k]) {
                                     maxima[i][k] = val;
                                 }
@@ -310,12 +310,12 @@ public class DataFileAverager {
         }
     }
 
-    void normaliseData(ArrayList<Double>[][] data, int numOfFiles, int numParams,
+    void normaliseData(ArrayList<ArrayList<ArrayList<Double>>> data, int numOfFiles, int numParams,
             double[][] minima, double[][] maxima) {
         for (int k = 0; k < numOfFiles; k++) {
             for (int j = 0; j < numParams; j++) {
-                if (data[k][j] != null) {
-                    int size = data[k][j].size();
+                if (data.get(k).get(j) != null) {
+                    int size = data.get(k).get(j).size();
                     double norm = 1.0;
                     double offset = 0.0;
                     if (normParams[j]) {
@@ -323,8 +323,8 @@ public class DataFileAverager {
                         norm = maxima[k][j] - offset;
                     }
                     for (int t = 0; t < size; t++) {
-                        if (data[k][j] != null && data[k][j].size() > t) {
-                            data[k][j].set(t, (data[k][j].get(t) - offset) / norm);
+                        if (data.get(k).get(j) != null && data.get(k).get(j).size() > t) {
+                            data.get(k).get(j).set(t, (data.get(k).get(j).get(t) - offset) / norm);
 //                        System.out.println("" + data[k][j].get(t));
                         }
                     }
@@ -333,7 +333,7 @@ public class DataFileAverager {
         }
     }
 
-    ArrayList<Double>[] calcMeanData(File directory, String[] headings, int numOfFiles, ArrayList<Double>[][] data) throws FileNotFoundException {
+    ArrayList<ArrayList<Double>> calcMeanData(File directory, String[] headings, int numOfFiles, ArrayList<ArrayList<ArrayList<Double>>> data) throws FileNotFoundException {
         File thisMeanData = new File(directory + DIR_DELIM + MEAN_DATA);
         PrintWriter thisDataStream = new PrintWriter(new FileOutputStream(thisMeanData));
         thisDataStream.println(directory.getAbsolutePath());
@@ -347,11 +347,11 @@ public class DataFileAverager {
         thisDataStream.println();
         boolean cont = true;
         int t = 0;
-        ArrayList<Double>[] meanData = new ArrayList[numParams];
+        ArrayList<ArrayList<Double>> meanData = new ArrayList<>();
         while (cont) {
             int n = 0;
             for (int i = 0; i < numOfFiles; i++) {
-                if (data[i][0] != null && data[i][0].size() > t) {
+                if (data.get(i).get(0) != null && data.get(i).get(0).size() > t) {
                     n++;
                 }
             }
@@ -363,18 +363,18 @@ public class DataFileAverager {
                     if (selection[j]) {
                         double thisdata[] = new double[n];
                         for (int k = 0, index = 0; k < numOfFiles; k++) {
-                            if (data[k][j] != null && data[k][j].size() > t) {
-                                thisdata[index] = data[k][j].get(t);
+                            if (data.get(k).get(j) != null && data.get(k).get(j).size() > t) {
+                                thisdata[index] = data.get(k).get(j).get(t);
                                 index++;
                             }
                         }
                         double mean = DataStatistics.calcMean(thisdata);
                         double stdDev = DataStatistics.calcStdDev(thisdata, n, mean);
                         thisDataStream.print(mean + ", " + stdDev + ", ");
-                        if (meanData[j] == null) {
-                            meanData[j] = new ArrayList<Double>();
+                        if (meanData.get(j) == null) {
+                            meanData.add(new ArrayList<>());
                         }
-                        meanData[j].add(mean);
+                        meanData.get(j).add(mean);
                     } else {
                         thisDataStream.print(", , ");
                     }
@@ -388,14 +388,14 @@ public class DataFileAverager {
         return meanData;
     }
 
-    void plotData(ArrayList<Double> data[]) {
-        for (int i = 0; i < data.length; i++) {
+    void plotData(ArrayList<ArrayList<Double>> data) {
+        for (int i = 0; i < data.size(); i++) {
             if (i != timeIndex && headings[i].compareTo(TIME) != 0) {
-                double xvals[] = new double[data[timeIndex].size()];
-                double yvals[] = new double[data[i].size()];
+                double xvals[] = new double[data.get(timeIndex).size()];
+                double yvals[] = new double[data.get(i).size()];
                 for (int j = 0; j < xvals.length; j++) {
-                    xvals[j] = data[timeIndex].get(j);
-                    yvals[j] = data[i].get(j);
+                    xvals[j] = data.get(timeIndex).get(j);
+                    yvals[j] = data.get(i).get(j);
                 }
                 Plot plot = new Plot(headings[i], headings[timeIndex], headings[i], xvals, yvals);
                 plot.show();

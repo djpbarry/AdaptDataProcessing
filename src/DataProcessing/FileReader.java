@@ -52,7 +52,7 @@ public class FileReader {
         this.charSet = charSet;
     }
 
-    public void readData(ArrayList<Double>[][] data, File[] files, String delimiter) throws FileNotFoundException, IOException {
+    public void readData(ArrayList<ArrayList<ArrayList<Double>>> data, File[] files, String delimiter) throws FileNotFoundException, IOException {
         for (int i = 0; i < numOfFiles; i++) {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i]), charSet));
             filenames[i] = br.readLine();
@@ -64,11 +64,11 @@ public class FileReader {
                     Scanner scan = new Scanner(line).useDelimiter(delimiter + "\\s*");
                     for (int k = 0; k < numThisParams; k++) {
                         int j = getParamIndex(thisParams.get(k), paramNames);
-                        if (data[i][j] == null) {
-                            data[i][j] = new ArrayList<Double>();
+                        if (data.get(i).get(j) == null) {
+                            data.get(i).add(new ArrayList<>());
                         }
                         double val = scan.nextDouble();
-                        data[i][j].add(val);
+                        data.get(i).get(j).add(val);
                     }
                     line = br.readLine();
                 }
