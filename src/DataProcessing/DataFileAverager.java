@@ -95,6 +95,9 @@ public class DataFileAverager {
         }
         numParams = reader.getNumParams();
         ArrayList<ArrayList<ArrayList<Double>>> data = new ArrayList<>();
+        for (int i = 0; i < numOfFiles; i++) {
+            data.add(new ArrayList());
+        }
         double maxima[][] = new double[numOfFiles][numParams];
         double minima[][] = new double[numOfFiles][numParams];
         if (selection == null || selection.length != numParams) {
@@ -349,6 +352,9 @@ public class DataFileAverager {
         boolean cont = true;
         int t = 0;
         ArrayList<ArrayList<Double>> meanData = new ArrayList<>();
+        for (int n = 0; n < numParams; n++) {
+            meanData.add(new ArrayList());
+        }
         while (cont) {
             int n = 0;
             for (int i = 0; i < numOfFiles; i++) {
