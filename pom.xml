@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.scijava</groupId>
         <artifactId>pom-scijava</artifactId>
-        <version>28.0.0</version>
+        <version>31.1.0</version>
         <relativePath/>
     </parent>
 
@@ -88,14 +88,26 @@
             <id>scijava.public</id>
             <url>https://maven.scijava.org/content/groups/public</url>
         </repository>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/djpbarry/*</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
             <groupId>net.calm</groupId>
             <artifactId>iaclasslibrary</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.6</version>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub djpbarry Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/djpbarry/adaptdataprocessing</url>
+        </repository>
+    </distributionManagement>
 
 </project>
