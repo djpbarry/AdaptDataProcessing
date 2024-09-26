@@ -13,7 +13,7 @@
 
     <groupId>net.calm</groupId>
     <artifactId>adaptdataprocessing</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 
     <name>Adapt Data Processing</name>
     <description>Maven implementation of adapt data processing.</description>
@@ -92,13 +92,17 @@
             <id>github</id>
             <url>https://maven.pkg.github.com/djpbarry/*</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>net.calm</groupId>
-            <artifactId>iaclasslibrary</artifactId>
-            <version>1.0.22</version>
+            <groupId>com.github.djpbarry</groupId>
+            <artifactId>IAClassLibrary</artifactId>
+            <version>07c456c334</version>
         </dependency>
     </dependencies>
 
