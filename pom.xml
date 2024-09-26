@@ -13,7 +13,7 @@
 
     <groupId>net.calm</groupId>
     <artifactId>adaptdataprocessing</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
 
     <name>Adapt Data Processing</name>
     <description>Maven implementation of adapt data processing.</description>
